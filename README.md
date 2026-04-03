@@ -1,0 +1,1 @@
+En este repositorio se encontrarán todos los trabajos correspondientes a la materia de 2do año React Native de la carrera "Tecnicatura Superior en Desarrollo de Software Multiplataforma" (TSDSM) del Instituto Politécnico Formosa (IPF).
