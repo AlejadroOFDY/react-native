@@ -32,10 +32,13 @@ export const importCharacter = async (req, res) => {
 
       currentPage++;
     }
-
-    res
-      .status(201)
-      .json({ message: "Personajes importados", total: totalImported });
+    if (totalImported >= 58) {
+      res.status(500).json({ message: "Ya se encuentran importados" });
+    } else {
+      res
+        .status(201)
+        .json({ message: "Personajes importados", total: totalImported });
+    }
   } catch (error) {
     res.status(500).json({ error: "Error interno del Servidor" });
   }
@@ -55,7 +58,7 @@ export const createCharacter = async (req, res) => {
       image,
       affiliation,
     });
-    res.status(201).json(newCharacter);
+    res.status(200).json(newCharacter);
   } catch (error) {
     res.status(500).json({ error: "Error interno del Servidor" });
   }
