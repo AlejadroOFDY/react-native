@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "./App.css";
-import Button from "./components/button";
 
 function App() {
   const [personajes, setPersonajes] = useState([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState();
+  const [eliminando, setEliminando] = useState();
   const [error, setError] = useState("");
 
   const traerPersonajes = async () => {
@@ -13,16 +13,47 @@ function App() {
       setError("");
 
       const respuesta = await fetch("http://localhost:3000/characters");
+
+      // const respuesta = await fetch("http://localhost:3000/characters/import", {
+      //   method: "POST",
+      // });
       if (!respuesta.ok) {
         throw new Error("No se pudieron traer los personajes");
       }
 
       const data = await respuesta.json();
-      setPersonajes(data);
+      if (!data || data.length === 0) {
+        alert("No hay personajes");
+      } else {
+        setPersonajes(data);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setCargando(false);
+    }
+  };
+
+  const eliminarPersonajes = async () => {
+    try {
+      setEliminando(true);
+      setError("");
+
+      const response = await fetch(
+        "http://localhost:3000/characters/delete-all",
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo eliminar los personajes");
+      }
+      setPersonajes([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setEliminando(false);
     }
   };
 
@@ -34,17 +65,18 @@ function App() {
       <div id="box0">
         <div className="buttons">
           <div className="traer">
-            <Button texto="Traer personajes" onClick={traerPersonajes} />
+            <button onClick={traerPersonajes}>Traer</button>
           </div>
           <div className="crear">
-            <Button texto="Crear" onClick={""} />
+            <button onClick={""}>Crear</button>
           </div>
           <div className="eliminar">
-            <Button texto="Eliminar" onClick={""} />
+            <button onClick={eliminarPersonajes}>Eliminarlos</button>
           </div>
         </div>
 
         {cargando && <p className="mensaje">Cargando personajes...</p>}
+        {eliminando && <p className="mensaje"> Eliminando personajes...</p>}
         {error && <p className="error">{error}</p>}
 
         <div className="grid-personajes">

@@ -6,6 +6,7 @@ export const importCharacter = async (req, res) => {
     let currentPage = 1;
     let totalPages = 1;
     let totalImported = 0;
+    // let allCharacters = [];
 
     while (currentPage <= totalPages) {
       const response = await fetch(
@@ -27,18 +28,17 @@ export const importCharacter = async (req, res) => {
           affiliation: character.affiliation,
         });
 
+        // allCharacters.push(character);
         totalImported++;
       }
 
       currentPage++;
     }
-    if (totalImported >= 58) {
-      res.status(500).json({ message: "Ya se encuentran importados" });
-    } else {
-      res
-        .status(201)
-        .json({ message: "Personajes importados", total: totalImported });
-    }
+    res.status(201).json({
+      // allCharacters,
+      message: "Personajes importados",
+      total: totalImported,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error interno del Servidor" });
   }
@@ -115,8 +115,22 @@ export const deleteCharacter = async (req, res) => {
 
   try {
     const character = await CharacterModel.findByPk(id);
-    character.destroy();
-    res.status(201).json({ message: "Personaje eliminado exitosamente" });
+    if (!character) {
+      return res.status(404).json({ error: "Personaje no encontrado" });
+    }
+
+    await character.destroy();
+    res.status(200).json({ message: "Personaje eliminado exitosamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error interno del Servidor" });
+  }
+};
+
+export const deleteAllCharacters = async (req, res) => {
+  try {
+    await CharacterModel.destroy({ where: {} });
+
+    res.status(201).json({ message: "Personajes Eliminados" });
   } catch (error) {
     res.status(500).json({ error: "Error interno del Servidor" });
   }
