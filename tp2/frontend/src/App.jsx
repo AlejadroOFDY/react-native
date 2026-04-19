@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
+import { useSearchCharacter } from "./hooks/searchCharacter";
 
 function App() {
   const [personajes, setPersonajes] = useState([]);
@@ -16,6 +17,21 @@ function App() {
     affiliation: "",
   });
   const [formulario, setFormulario] = useState(false);
+  const {
+    busqueda,
+    setBusqueda,
+    mostrarBusqueda,
+    setMostrarBusqueda,
+    personajesFiltrados,
+    personajeEditando,
+    setPersonajeEditando,
+    formularioEditar,
+    setFormularioEditar,
+    abrirEditarPersonaje,
+    eliminarPersonajeUnico,
+    handleInputChangeEditar,
+    actualizarPersonaje,
+  } = useSearchCharacter(personajes, setPersonajes);
 
   const traerPersonajes = async () => {
     try {
@@ -147,6 +163,119 @@ function App() {
           {cargando && <p className="mensaje">Cargando...</p>}
           {eliminando && <p className="mensaje"> Eliminando...</p>}
           {error && <p className="error">{error}</p>}
+
+          <div className="busqueda-container">
+            <input
+              type="text"
+              placeholder="Buscar personaje..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="busqueda-input"
+            />
+          </div>
+
+          {busqueda && personajesFiltrados.length > 0 && (
+            <div className="resultados-busqueda">
+              <h3>Resultados de búsqueda ({personajesFiltrados.length})</h3>
+              <div className="grid-personajes">
+                {personajesFiltrados.map((p) => (
+                  <article className="card-personaje" key={p.id}>
+                    <img src={p.image} alt={p.name} />
+                    <h3>{p.name}</h3>
+                    <p>Raza: {p.race}</p>
+                    <p>Ki: {p.ki}</p>
+                    <p>Afiliacion: {p.affiliation}</p>
+                    <div className="botones-card">
+                      <button
+                        className="btn-actualizar"
+                        onClick={() => abrirEditarPersonaje(p)}
+                      >
+                        Actualizar
+                      </button>
+                      <button
+                        className="btn-eliminar"
+                        onClick={() => eliminarPersonajeUnico(p.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {formularioEditar && (
+            <div className="modal">
+              <div className="modal-contenido">
+                <h2>Actualizar personaje</h2>
+                <form onSubmit={actualizarPersonaje}>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Nombre *"
+                    value={personajeEditando?.name || ""}
+                    onChange={handleInputChangeEditar}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="race"
+                    placeholder="Raza *"
+                    value={personajeEditando?.race || ""}
+                    onChange={handleInputChangeEditar}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="ki"
+                    placeholder="Ki (ej: 1000)"
+                    value={personajeEditando?.ki || ""}
+                    onChange={handleInputChangeEditar}
+                  />
+                  <input
+                    type="text"
+                    name="maxKi"
+                    placeholder="Max Ki"
+                    value={personajeEditando?.maxKi || ""}
+                    onChange={handleInputChangeEditar}
+                  />
+                  <input
+                    type="text"
+                    name="affiliation"
+                    placeholder="Afiliación"
+                    value={personajeEditando?.affiliation || ""}
+                    onChange={handleInputChangeEditar}
+                  />
+                  <input
+                    type="text"
+                    name="image"
+                    placeholder="URL de la imagen"
+                    value={personajeEditando?.image || ""}
+                    onChange={handleInputChangeEditar}
+                  />
+                  <textarea
+                    name="description"
+                    placeholder="Descripción"
+                    value={personajeEditando?.description || ""}
+                    onChange={handleInputChangeEditar}
+                    rows="3"
+                  />
+
+                  <div className="botones-form">
+                    <button type="submit">Guardar cambios</button>
+                    <button
+                      type="button"
+                      onClick={() => setFormularioEditar(false)}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           {formulario && (
             <div className="modal">
               <div className="modal-contenido">
@@ -217,17 +346,40 @@ function App() {
             </div>
           )}
 
-          <div className="grid-personajes">
-            {personajes.map((p) => (
-              <article className="card-personaje" key={p.id}>
-                <img src={p.image} alt={p.name} />
-                <h3>{p.name}</h3>
-                <p>Raza: {p.race}</p>
-                <p>Ki: {p.ki}</p>
-                <p>Afiliacion: {p.affiliation}</p>
-              </article>
-            ))}
-          </div>
+          {!busqueda && (
+            <div className="grid-personajes">
+              {personajes.length === 0 ? (
+                <p className="sin-personajes">
+                  No hay personajes cargados. Haz clic en "Traer" para
+                  importarlos.
+                </p>
+              ) : (
+                personajes.map((p) => (
+                  <article className="card-personaje" key={p.id}>
+                    <img src={p.image} alt={p.name} />
+                    <h3>{p.name}</h3>
+                    <p>Raza: {p.race}</p>
+                    <p>Ki: {p.ki}</p>
+                    <p>Afiliacion: {p.affiliation}</p>
+                    <div className="botones-card">
+                      <button
+                        className="btn-actualizar"
+                        onClick={() => abrirEditarPersonaje(p)}
+                      >
+                        Actualizar
+                      </button>
+                      <button
+                        className="btn-eliminar"
+                        onClick={() => eliminarPersonajeUnico(p.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </section>
     </>
