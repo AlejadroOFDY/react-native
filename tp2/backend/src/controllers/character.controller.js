@@ -3,10 +3,16 @@ import { CharacterModel } from "../models/character.model.js";
 // Treer de la API
 export const importCharacter = async (req, res) => {
   try {
+    const isEmpty = await CharacterModel.findAll();
+
+    if (isEmpty.length >= 58) {
+      return res
+        .status(400)
+        .json({ message: "Los personajes ya se encuentran importados" });
+    }
     let currentPage = 1;
     let totalPages = 1;
     let totalImported = 0;
-    // let allCharacters = [];
 
     while (currentPage <= totalPages) {
       const response = await fetch(
@@ -27,20 +33,17 @@ export const importCharacter = async (req, res) => {
           image: character.image,
           affiliation: character.affiliation,
         });
-
-        // allCharacters.push(character);
         totalImported++;
       }
 
       currentPage++;
     }
     res.status(201).json({
-      // allCharacters,
       message: "Personajes importados",
       total: totalImported,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error interno del Servidor" });
+    res.status(500).json({ message: error });
   }
 };
 
