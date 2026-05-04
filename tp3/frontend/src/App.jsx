@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import "./App.css";
 import { useSearchCharacter } from "./hooks/searchCharacter";
+import { ThemeContext } from "./context/ThemeContext";
 
 function App() {
   const [personajes, setPersonajes] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const [error, setError] = useState("");
+  const { backgroundImage, cambiarFondo } = useContext(ThemeContext);
   const [nuevoPersonaje, setNuevoPersonaje] = useState({
     name: "",
     ki: "",
@@ -32,6 +34,10 @@ function App() {
     handleInputChangeEditar,
     actualizarPersonaje,
   } = useSearchCharacter(personajes, setPersonajes);
+
+  useEffect(() => {
+    document.body.style.backgroundImage = `url(/${backgroundImage})`;
+  }, [backgroundImage]);
 
   const traerPersonajes = async () => {
     try {
@@ -157,6 +163,9 @@ function App() {
             </div>
             <div className="eliminar">
               <button onClick={eliminarPersonajes}>Eliminarlos</button>
+            </div>
+            <div className="cambiar">
+              <button onClick={cambiarFondo}>Cambiar</button>
             </div>
           </div>
 
